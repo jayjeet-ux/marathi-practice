@@ -134,7 +134,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const consonants = [
     { id:"ka",   mr:"क",  en:"ka"  }, { id:"kha",  mr:"ख",  en:"kha" },
     { id:"ga",   mr:"ग",  en:"ga"  }, { id:"gha",  mr:"घ",  en:"gha" },
-    
+
     { id:"cha",  mr:"च",  en:"cha" }, { id:"chha", mr:"छ",  en:"chha" },
     { id:"ja",   mr:"ज",  en:"ja"  }, { id:"zha",  mr:"झ",  en:"zha" },
 
@@ -189,6 +189,24 @@ document.addEventListener("DOMContentLoaded", function () {
   initCounts("all", allItems);
   initCounts("vowels", vowels);
   initCounts("consonants", consonants);
+
+  function playDing() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const ctx = new AudioCtx();
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.value = 880;
+    gain.gain.value = 0.15;
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.12);
+  }
 
   function setActiveModeButton() {
     modeAll.classList.toggle("active", mode === "all");
@@ -267,6 +285,7 @@ document.addEventListener("DOMContentLoaded", function () {
     currentIndex = 0;
     setActiveModeButton();
     nextItem();
+    playDing();
   }
 
   modeAll.addEventListener("click", function(){ setMode("all"); });
@@ -274,10 +293,17 @@ document.addEventListener("DOMContentLoaded", function () {
   modeConsonants.addEventListener("click", function(){ setMode("consonants"); });
 
   soundBtn.addEventListener("click", playSound);
-  nextBtn.addEventListener("click", nextItem);
+
+  nextBtn.addEventListener("click", function () {
+    nextItem();
+    playDing();
+  });
 
   document.addEventListener("keydown", function(e){
-    if (e.key === "ArrowRight") nextItem();
+    if (e.key === "ArrowRight") {
+      nextItem();
+      playDing();
+    }
     if (e.key === "k" || e.key === "K") playSound();
   });
 
