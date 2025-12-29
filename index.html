@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Marathi Letters Practice</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, Arial, sans-serif;
+  background: #0b0f19;
+  color: #eef2ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.card {
+  width: 90vw;
+  max-width: 700px;
+  background: #111a2e;
+  border-radius: 18px;
+  padding: 30px;
+  text-align: center;
+}
+
+.topRow {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.pill {
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.08);
+  color: #eef2ff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.pill.active {
+  background: rgba(34,197,94,0.25);
+}
+
+.letter {
+  font-size: 140px;
+  margin: 18px 0 10px 0;
+}
+
+.hint {
+  font-size: 26px;
+  min-height: 34px;
+  margin-bottom: 18px;
+}
+
+.row {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+button {
+  border: none;
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.keyBtn {
+  background: #fbbf24;
+  color: #111827;
+  font-weight: 700;
+  min-width: 200px;
+}
+
+.nextBtn {
+  background: #22c55e;
+  font-size: 34px;
+  width: 140px;
+  height: 74px;
+}
+</style>
+</head>
+
+<body>
+<div class="card">
+
+  <div class="topRow">
+    <button id="modeAll" class="pill active">All</button>
+    <button id="modeVowels" class="pill">Vowels</button>
+    <button id="modeConsonants" class="pill">Consonants</button>
+  </div>
+
+  <div id="letter" class="letter">अ</div>
+  <div id="hint" class="hint"></div>
+
+  <div class="row">
+    <button id="keyBtn" class="keyBtn">Show sound</button>
+    <button id="nextBtn" class="nextBtn">Next</button>
+  </div>
+
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  let audioCtx;
+
+  function clickSound() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "square";
+    osc.frequency.value = 800;
+    gain.gain.value = 0.04;
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.05);
+  }
+
+  const vowels = [
+    { mr: "अ", en: "a" }, { mr: "आ", en: "aa" }, { mr: "इ", en: "i" },
+    { mr: "ई", en: "ii" }, { mr: "उ", en: "u" }, { mr: "ऊ", en: "uu" },
+    { mr: "ऋ", en: "ru" }, { mr: "ए", en: "e" }, { mr: "ऐ", en: "ai" },
+    { mr: "ओ", en: "o" }, { mr: "औ", en: "au" },
+    { mr: "अं", en: "am" }, { mr: "अः", en: "ah" }
+  ];
+
+  const consonants = [
+    { mr: "क", en: "ka" }, { mr: "ख", en: "kha" }, { mr: "ग", en: "ga" },
+    { mr: "घ", en: "gha" }, { mr: "ङ", en: "nga" },
+    { mr: "च", en: "cha" }, { mr: "छ", en: "chha" }, { mr: "ज", en: "ja" },
+    { mr: "झ", en: "jha" }, { mr: "ञ", en: "nya" },
+    { mr: "ट", en: "ta" }, { mr: "ठ", en: "tha" }, { mr: "ड", en: "da" },
+    { mr: "ढ", en: "dha" }, { mr: "ण", en: "na" },
+    { mr: "त", en: "ta" }, { mr: "थ", en: "tha" }, { mr: "द", en: "da" },
+    { mr: "ध", en: "dha" }, { mr: "न", en: "na" },
+    { mr: "प", en: "pa" }, { mr: "फ", en: "pha" }, { mr: "ब", en: "ba" },
+    { mr: "भ", en: "bha" }, { mr: "म", en: "ma" },
+    { mr: "य", en: "ya" }, { mr: "र", en: "ra" }, { mr: "ल", en: "la" },
+    { mr: "व", en: "va" },
+    { mr: "श", en: "sha" }, { mr: "ष", en: "sha" },
+    { mr: "स", en: "sa" }, { mr: "ह", en: "ha" },
+    { mr: "ळ", en: "la" }
+  ];
+
+  const letterEl = document.getElementById("letter");
+  const hintEl = document.getElementById("hint");
+  const keyBtn = document.getElementById("keyBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  const modeAll = document.getElementById("modeAll");
+  const modeVowels = document.getElementById("modeVowels");
+  const modeConsonants = document.getElementById("modeConsonants");
+
+  let mode = "all";
+  let pool = [];
+  let counts = {};
+  let currentIndex = 0;
+  let revealed = false;
+
+  function setPool() {
+    pool = mode === "vowels" ? vowels : mode === "consonants" ? consonants : vowels.concat(consonants);
+    counts = {};
+    pool.forEach(l => counts[l.mr] = 0);
+  }
+
+  function resetIfDone() {
+    if (Object.values(counts).every(v => v >= 2)) {
+      pool.forEach(l => counts[l.mr] = 0);
+    }
+  }
+
+  function pickIndex() {
+    resetIfDone();
+    const available = pool.map((l,i) => counts[l.mr] < 2 ? i : null).filter(i => i !== null);
+    let idx = available[Math.floor(Math.random() * available.length)];
+    if (available.length > 1) {
+      while (idx === currentIndex) idx = available[Math.floor(Math.random() * available.length)];
+    }
+    return idx;
+  }
+
+  function render(idx) {
+    currentIndex = idx;
+    counts[pool[idx].mr]++;
+    revealed = false;
+    letterEl.textContent = pool[idx].mr;
+    hintEl.textContent = "";
+    keyBtn.textContent = "Show sound";
+  }
+
+  function next() {
+    clickSound();
+    render(pickIndex());
+  }
+
+  function toggle() {
+    clickSound();
+    if (!revealed) {
+      hintEl.textContent = pool[currentIndex].en;
+      keyBtn.textContent = "Hide sound";
+      revealed = true;
+    } else {
+      hintEl.textContent = "";
+      keyBtn.textContent = "Show sound";
+      revealed = false;
+    }
+  }
+
+  function switchMode(m) {
+    clickSound();
+    mode = m;
+    modeAll.classList.toggle("active", m === "all");
+    modeVowels.classList.toggle("active", m === "vowels");
+    modeConsonants.classList.toggle("active", m === "consonants");
+    setPool();
+    render(0);
+  }
+
+  keyBtn.onclick = toggle;
+  nextBtn.onclick = next;
+
+  modeAll.onclick = () => switchMode("all");
+  modeVowels.onclick = () => switchMode("vowels");
+  modeConsonants.onclick = () => switchMode("consonants");
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") next();
+    if (e.key === "k" || e.key === "K") toggle();
+  });
+
+  setPool();
+  render(0);
+});
+</script>
+</body>
+</html>
