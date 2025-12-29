@@ -6,241 +6,285 @@
 <title>Marathi Letters Practice</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: system-ui, Arial, sans-serif;
-  background: #0b0f19;
-  color: #eef2ff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-
-.card {
-  width: 90vw;
-  max-width: 700px;
-  background: #111a2e;
-  border-radius: 18px;
-  padding: 30px;
-  text-align: center;
-}
-
-.topRow {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.pill {
-  border: 1px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.08);
-  color: #eef2ff;
-  padding: 10px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.pill.active {
-  background: rgba(34,197,94,0.25);
-}
-
-.letter {
-  font-size: 140px;
-  margin: 18px 0 10px 0;
-}
-
-.hint {
-  font-size: 26px;
-  min-height: 34px;
-  margin-bottom: 18px;
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  flex-wrap: wrap;
-}
-
-button {
-  border: none;
-  border-radius: 14px;
-  padding: 16px 20px;
-  font-size: 18px;
-  cursor: pointer;
-}
-
-.keyBtn {
-  background: #fbbf24;
-  color: #111827;
-  font-weight: 700;
-  min-width: 200px;
-}
-
-.nextBtn {
-  background: #22c55e;
-  font-size: 34px;
-  width: 140px;
-  height: 74px;
-}
+  body{
+    margin:0;
+    font-family:system-ui, Arial, sans-serif;
+    background:#0b0f19;
+    color:#eef2ff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+  }
+  .card{
+    width:92vw;
+    max-width:760px;
+    background:#111a2e;
+    border-radius:18px;
+    padding:22px;
+    box-sizing:border-box;
+    text-align:center;
+  }
+  .topRow{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .modeBtn{
+    border:none;
+    border-radius:12px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-size:16px;
+    background:rgba(255,255,255,0.10);
+    color:#eef2ff;
+  }
+  .modeBtn.active{
+    background:#60a5fa;
+    color:#071022;
+    font-weight:700;
+  }
+  .letter{
+    font-size:140px;
+    line-height:1;
+    margin:18px 0 10px 0;
+  }
+  .hint{
+    font-size:22px;
+    min-height:30px;
+    opacity:0.9;
+    margin-bottom:14px;
+  }
+  .row{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  button{
+    border:none;
+    border-radius:14px;
+    padding:16px 18px;
+    font-size:18px;
+    cursor:pointer;
+  }
+  .soundBtn{
+    background:#fbbf24;
+    color:#111827;
+    font-weight:800;
+    min-width:210px;
+  }
+  .nextBtn{
+    background:#22c55e;
+    color:#052012;
+    font-size:34px;
+    width:150px;
+    height:74px;
+    font-weight:900;
+  }
+  .tiny{
+    margin-top:12px;
+    font-size:14px;
+    opacity:0.75;
+  }
 </style>
 </head>
 
 <body>
-<div class="card">
+  <div class="card">
+    <div class="topRow">
+      <button id="modeAll" class="modeBtn active" type="button">All</button>
+      <button id="modeVowels" class="modeBtn" type="button">Vowels</button>
+      <button id="modeConsonants" class="modeBtn" type="button">Consonants</button>
+    </div>
 
-  <div class="topRow">
-    <button id="modeAll" class="pill active">All</button>
-    <button id="modeVowels" class="pill">Vowels</button>
-    <button id="modeConsonants" class="pill">Consonants</button>
+    <div id="letter" class="letter">अ</div>
+    <div id="hint" class="hint"></div>
+
+    <div class="row">
+      <button id="soundBtn" class="soundBtn" type="button">Play sound</button>
+      <button id="nextBtn" class="nextBtn" type="button">Next</button>
+    </div>
+
+    <div class="tiny">
+      Keyboard, press K to play sound, press right arrow for next.
+    </div>
   </div>
-
-  <div id="letter" class="letter">अ</div>
-  <div id="hint" class="hint"></div>
-
-  <div class="row">
-    <button id="keyBtn" class="keyBtn">Show sound</button>
-    <button id="nextBtn" class="nextBtn">Next</button>
-  </div>
-
-</div>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
 
-  let audioCtx;
-
-  function clickSound() {
-    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = "square";
-    osc.frequency.value = 800;
-    gain.gain.value = 0.04;
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.05);
-  }
-
   const vowels = [
-    { mr: "अ", en: "a" }, { mr: "आ", en: "aa" }, { mr: "इ", en: "i" },
-    { mr: "ई", en: "ii" }, { mr: "उ", en: "u" }, { mr: "ऊ", en: "uu" },
-    { mr: "ऋ", en: "ru" }, { mr: "ए", en: "e" }, { mr: "ऐ", en: "ai" },
-    { mr: "ओ", en: "o" }, { mr: "औ", en: "au" },
-    { mr: "अं", en: "am" }, { mr: "अः", en: "ah" }
+    { id:"a",  mr:"अ",  en:"a"  },
+    { id:"aa", mr:"आ",  en:"aa" },
+    { id:"e",  mr:"इ",  en:"e"  },
+    { id:"ee", mr:"ई",  en:"ee" },
+    { id:"u",  mr:"उ",  en:"u"  },
+    { id:"uu", mr:"ऊ",  en:"uu" },
+    { id:"ae", mr:"ए",  en:"ae" },
+    { id:"ai", mr:"ऐ",  en:"ai" },
+    { id:"o",  mr:"ओ",  en:"o"  },
+    { id:"au", mr:"औ",  en:"au" },
+    { id:"am", mr:"अं", en:"am" },
+    { id:"ah", mr:"अः", en:"ah" }
   ];
 
   const consonants = [
-    { mr: "क", en: "ka" }, { mr: "ख", en: "kha" }, { mr: "ग", en: "ga" },
-    { mr: "घ", en: "gha" }, { mr: "ङ", en: "nga" },
-    { mr: "च", en: "cha" }, { mr: "छ", en: "chha" }, { mr: "ज", en: "ja" },
-    { mr: "झ", en: "jha" }, { mr: "ञ", en: "nya" },
-    { mr: "ट", en: "ta" }, { mr: "ठ", en: "tha" }, { mr: "ड", en: "da" },
-    { mr: "ढ", en: "dha" }, { mr: "ण", en: "na" },
-    { mr: "त", en: "ta" }, { mr: "थ", en: "tha" }, { mr: "द", en: "da" },
-    { mr: "ध", en: "dha" }, { mr: "न", en: "na" },
-    { mr: "प", en: "pa" }, { mr: "फ", en: "pha" }, { mr: "ब", en: "ba" },
-    { mr: "भ", en: "bha" }, { mr: "म", en: "ma" },
-    { mr: "य", en: "ya" }, { mr: "र", en: "ra" }, { mr: "ल", en: "la" },
-    { mr: "व", en: "va" },
-    { mr: "श", en: "sha" }, { mr: "ष", en: "sha" },
-    { mr: "स", en: "sa" }, { mr: "ह", en: "ha" },
-    { mr: "ळ", en: "la" }
+    { id:"ka",   mr:"क",  en:"ka"  }, { id:"kha",  mr:"ख",  en:"kha" },
+    { id:"ga",   mr:"ग",  en:"ga"  }, { id:"gha",  mr:"घ",  en:"gha" },
+    
+    { id:"cha",  mr:"च",  en:"cha" }, { id:"chha", mr:"छ",  en:"chha" },
+    { id:"ja",   mr:"ज",  en:"ja"  }, { id:"zha",  mr:"झ",  en:"zha" },
+
+    { id:"ta",   mr:"ट",  en:"ta"  }, { id:"ttha", mr:"ठ",  en:"ttha" },
+    { id:"dda",  mr:"ड",  en:"dda" }, { id:"ddha", mr:"ढ",  en:"ddha" },
+    { id:"nna",  mr:"ण",  en:"nna" },
+
+    { id:"tta",  mr:"त",  en:"tta" }, { id:"tha",  mr:"थ",  en:"tha" },
+    { id:"da",   mr:"द",  en:"da"  }, { id:"dha",  mr:"ध",  en:"dha" },
+    { id:"na",   mr:"न",  en:"na"  },
+
+    { id:"pa",   mr:"प",  en:"pa"  }, { id:"pha",  mr:"फ",  en:"pha" },
+    { id:"ba",   mr:"ब",  en:"ba"  }, { id:"bha",  mr:"भ",  en:"bha" },
+    { id:"ma",   mr:"म",  en:"ma"  },
+
+    { id:"ya",   mr:"य",  en:"ya"  }, { id:"ra",   mr:"र",  en:"ra"  },
+    { id:"la",   mr:"ल",  en:"la"  }, { id:"va",   mr:"व",  en:"va"  },
+
+    { id:"sha",  mr:"श",  en:"sha" }, { id:"shha", mr:"ष",  en:"shha" },
+    { id:"sa",   mr:"स",  en:"sa"  }, { id:"ha",   mr:"ह",  en:"ha"  },
+
+    { id:"lla",  mr:"ळ",  en:"lla" },
+    { id:"ksh",  mr:"क्ष", en:"ksh" },
+    { id:"dyna", mr:"ज्ञ", en:"dyna" }
   ];
+
+  const allItems = vowels.concat(consonants);
 
   const letterEl = document.getElementById("letter");
   const hintEl = document.getElementById("hint");
-  const keyBtn = document.getElementById("keyBtn");
+  const soundBtn = document.getElementById("soundBtn");
   const nextBtn = document.getElementById("nextBtn");
 
   const modeAll = document.getElementById("modeAll");
   const modeVowels = document.getElementById("modeVowels");
   const modeConsonants = document.getElementById("modeConsonants");
 
-  let mode = "all";
-  let pool = [];
-  let counts = {};
-  let currentIndex = 0;
-  let revealed = false;
+  const player = new Audio();
+  player.preload = "auto";
 
-  function setPool() {
-    pool = mode === "vowels" ? vowels : mode === "consonants" ? consonants : vowels.concat(consonants);
-    counts = {};
-    pool.forEach(l => counts[l.mr] = 0);
+  let mode = "all";
+  let pool = allItems;
+  let currentIndex = 0;
+
+  const counts = { all:{}, vowels:{}, consonants:{} };
+
+  function initCounts(modeKey, list) {
+    counts[modeKey] = {};
+    list.forEach(it => { counts[modeKey][it.id] = 0; });
+  }
+
+  initCounts("all", allItems);
+  initCounts("vowels", vowels);
+  initCounts("consonants", consonants);
+
+  function setActiveModeButton() {
+    modeAll.classList.toggle("active", mode === "all");
+    modeVowels.classList.toggle("active", mode === "vowels");
+    modeConsonants.classList.toggle("active", mode === "consonants");
+  }
+
+  function getCountsObj() {
+    return counts[mode];
   }
 
   function resetIfDone() {
-    if (Object.values(counts).every(v => v >= 2)) {
-      pool.forEach(l => counts[l.mr] = 0);
-    }
+    const c = getCountsObj();
+    const keys = Object.keys(c);
+    if (keys.length === 0) return;
+    const done = keys.every(k => c[k] >= 2);
+    if (done) keys.forEach(k => c[k] = 0);
   }
 
   function pickIndex() {
     resetIfDone();
-    const available = pool.map((l,i) => counts[l.mr] < 2 ? i : null).filter(i => i !== null);
+    const c = getCountsObj();
+
+    const available = [];
+    for (let i = 0; i < pool.length; i++) {
+      if ((c[pool[i].id] || 0) < 2) available.push(i);
+    }
+
+    if (available.length === 0) {
+      Object.keys(c).forEach(k => c[k] = 0);
+      for (let i = 0; i < pool.length; i++) available.push(i);
+    }
+
     let idx = available[Math.floor(Math.random() * available.length)];
     if (available.length > 1) {
-      while (idx === currentIndex) idx = available[Math.floor(Math.random() * available.length)];
+      while (idx === currentIndex) {
+        idx = available[Math.floor(Math.random() * available.length)];
+      }
     }
     return idx;
   }
 
   function render(idx) {
     currentIndex = idx;
-    counts[pool[idx].mr]++;
-    revealed = false;
-    letterEl.textContent = pool[idx].mr;
+    const item = pool[currentIndex];
+    const c = getCountsObj();
+    c[item.id] = (c[item.id] || 0) + 1;
+
+    letterEl.textContent = item.mr;
     hintEl.textContent = "";
-    keyBtn.textContent = "Show sound";
   }
 
-  function next() {
-    clickSound();
+  function nextItem() {
     render(pickIndex());
   }
 
-  function toggle() {
-    clickSound();
-    if (!revealed) {
-      hintEl.textContent = pool[currentIndex].en;
-      keyBtn.textContent = "Hide sound";
-      revealed = true;
-    } else {
-      hintEl.textContent = "";
-      keyBtn.textContent = "Show sound";
-      revealed = false;
-    }
+  function playSound() {
+    const item = pool[currentIndex];
+
+    hintEl.textContent = item.en;
+
+    const file = "audio/" + encodeURIComponent(String(item.id).toLowerCase()) + ".m4a";
+
+    player.pause();
+    player.currentTime = 0;
+    player.src = file;
+
+    player.play().catch(() => {
+      hintEl.textContent = "Missing audio file: " + file;
+    });
   }
 
-  function switchMode(m) {
-    clickSound();
-    mode = m;
-    modeAll.classList.toggle("active", m === "all");
-    modeVowels.classList.toggle("active", m === "vowels");
-    modeConsonants.classList.toggle("active", m === "consonants");
-    setPool();
-    render(0);
+  function setMode(newMode) {
+    mode = newMode;
+    pool = (mode === "vowels") ? vowels : (mode === "consonants" ? consonants : allItems);
+    currentIndex = 0;
+    setActiveModeButton();
+    nextItem();
   }
 
-  keyBtn.onclick = toggle;
-  nextBtn.onclick = next;
+  modeAll.addEventListener("click", function(){ setMode("all"); });
+  modeVowels.addEventListener("click", function(){ setMode("vowels"); });
+  modeConsonants.addEventListener("click", function(){ setMode("consonants"); });
 
-  modeAll.onclick = () => switchMode("all");
-  modeVowels.onclick = () => switchMode("vowels");
-  modeConsonants.onclick = () => switchMode("consonants");
+  soundBtn.addEventListener("click", playSound);
+  nextBtn.addEventListener("click", nextItem);
 
-  document.addEventListener("keydown", e => {
-    if (e.key === "ArrowRight") next();
-    if (e.key === "k" || e.key === "K") toggle();
+  document.addEventListener("keydown", function(e){
+    if (e.key === "ArrowRight") nextItem();
+    if (e.key === "k" || e.key === "K") playSound();
   });
 
-  setPool();
-  render(0);
+  setActiveModeButton();
+  setMode("all");
 });
 </script>
+
 </body>
 </html>
