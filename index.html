@@ -280,13 +280,17 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function setMode(newMode) {
-    mode = newMode;
-    pool = (mode === "vowels") ? vowels : (mode === "consonants" ? consonants : allItems);
-    currentIndex = 0;
-    setActiveModeButton();
-    nextItem();
-    playDing();
-  }
+  mode = newMode;
+  pool = (mode === "vowels") ? vowels : (mode === "consonants" ? consonants : allItems);
+
+  const c = getCountsObj();
+  Object.keys(c).forEach(k => c[k] = 0);
+
+  currentIndex = 0;
+  setActiveModeButton();
+  nextItem();
+  playDing();
+}
 
   modeAll.addEventListener("click", function(){ setMode("all"); });
   modeVowels.addEventListener("click", function(){ setMode("vowels"); });
